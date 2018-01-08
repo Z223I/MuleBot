@@ -32,14 +32,30 @@ class MuleBot:
 
     self.motorMaxRPM = 12
 
+    # Pin Setup:
+    GPIO.setmode(GPIO.BCM) # Broadcom pin-numbering scheme
+    GPIO.setup(self.pwmEnablePin,       GPIO.OUT)
+    GPIO.setup(self.motor1DirectionPin, GPIO.OUT)
+    GPIO.setup(self.motor2DirectionPin, GPIO.OUT)
 
-  def motorDirection(motorPin, direction):
+    GPIO.output(self.pwmEnablePin,       GPIO.LOW )
+
+    # This is interupts setups.  They get used with the
+    # test() method.
+    #GPIO.setup(laserDetectLeftPin,  GPIO.IN, pull_up_down=GPIO.PUD_UP)
+    #GPIO.setup(laserDetectRightPin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+
+    #GPIO.add_event_detect(laserDetectLeftPin,  GPIO.FALLING, callback=myInt)
+    #GPIO.add_event_detect(laserDetectRightPin, GPIO.FALLING, callback=myInt)
+
+
+  def motorDirection(self, motorPin, direction):
   #  print "motorPin: ", motorPin
   #  print "direction: ",  direction
     GPIO.output(motorPin, direction)
 
 
-  def motorsDirection(direction):
+  def motorsDirection(self, direction):
     print direction
     if direction == 'r' or direction == 'R':
       self.motorDirection(self.motor1DirectionPin, self.motorReverse)
@@ -50,7 +66,7 @@ class MuleBot:
       self.motorDirection(self.motor2DirectionPin, self.motorForward)
       print "Direction forward"
 
-  def dcMotorLeftTurn(duration):
+  def dcMotorLeftTurn(self, duration):
     print "From dcMotorLeftTurn: ", self.dcMotorPWMDurationLeft
     tempPWMDurationLeft = self.dcMotorPWMDurationLeft * 70 / 100  # 98
     pwm.setPWM(self.dcMotorLeftMotor, 0, tempPWMDurationLeft)
@@ -62,7 +78,7 @@ class MuleBot:
     pwm.setPWM(self.dcMotorLeftMotor, 0, self.dcMotorPWMDurationLeft)
 
 
-  def dcMotorRightTurn(duration):
+  def dcMotorRightTurn(self, duration):
     tempPWMDurationRight = self.dcMotorPWMDurationRight * 70 / 100
     pwm.setPWM(self.dcMotorRightMotor, 0, tempPWMDurationRight)
 
@@ -73,7 +89,7 @@ class MuleBot:
     pwm.setPWM(self.dcMotorRightMotor, 0, self.dcMotorPWMDurationRight)
 
 
-  def motorSpeed(speedRPM):
+  def motorSpeed(self, speedRPM):
 
     #global dcMotorPWMDurationLeft
     #global dcMotorPWMDurationRight
@@ -123,32 +139,16 @@ class MuleBot:
     self.dcMotorPWMDurationLeft = 0
     self.dcMotorPWMDurationRight = 0
 
-    # Pin Setup:
-    GPIO.setmode(GPIO.BCM) # Broadcom pin-numbering scheme
-    GPIO.setup(self.pwmEnablePin,       GPIO.OUT)
-    GPIO.setup(self.motor1DirectionPin, GPIO.OUT)
-    GPIO.setup(self.motor2DirectionPin, GPIO.OUT)
 
-    GPIO.output(self.pwmEnablePin,       GPIO.LOW )
-
-
-
-
-    #GPIO.setup(laserDetectLeftPin,  GPIO.IN, pull_up_down=GPIO.PUD_UP)
-    #GPIO.setup(laserDetectRightPin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-
-    #GPIO.add_event_detect(laserDetectLeftPin,  GPIO.FALLING, callback=myInt)
-    #GPIO.add_event_detect(laserDetectRightPin, GPIO.FALLING, callback=myInt)
-
-    def setMotorsDirection(_direction):
-      if _direction == 'f' or _direction == 'F':
-        self.motorDirection(self.motor1DirectionPin, self.motorForward)
-        self.motorDirection(self.motor2DirectionPin, self.motorForward)
-      elif _direction == 'r' or _direction == 'R':
-        self.motorDirection(self.motor1DirectionPin, self.motorReverse)
-        self.motorDirection(self.motor2DirectionPin, self.motorReverse)
-      else:
-        print "ERROR: setMotorsDirection bad parameter: " + direction
+  def setMotorsDirection(self, _direction):
+    if _direction == 'f' or _direction == 'F':
+      self.motorDirection(self.motor1DirectionPin, self.motorForward)
+      self.motorDirection(self.motor2DirectionPin, self.motorForward)
+    elif _direction == 'r' or _direction == 'R':
+      self.motorDirection(self.motor1DirectionPin, self.motorReverse)
+      self.motorDirection(self.motor2DirectionPin, self.motorReverse)
+    else:
+      print "ERROR: setMotorsDirection bad parameter: " + direction
 
 
 
@@ -288,18 +288,18 @@ try:
 
     # Change speed of motors
     cmd = raw_input(":;<  Command, f/r 0..9, E.g. f5: ")
+    command = cmd[0]
 
-
-    if cmd[0] == 'h':
+    if command == 'h':
       doContinue = False
-    elif cmd[0] == 'p':
+    elif command == 'p':
       mb.dcMotorLeftTurn (  ord(cmd[1]) - ord('0')  )
-    elif cmd[0] == 's':
+    elif command == 's':
       mb.dcMotorRightTurn(  ord(cmd[1]) - ord('0')  )
-    elif cmd[0] == 't':
+    elif command == 't':
       test()
-    elif cmd[0] == 'f' or cmd[0] == 'r':
-      direction = cmd[0]
+    elif command == 'f' or command == 'r':
+      direction = command
       print direction
       mb.setMotorsDirection(direction)
 
@@ -308,7 +308,7 @@ try:
       mb.motorSpeed(count)
 
     else:
-      print "Invalid input: ", cmd[0]
+      print "Invalid input: ", command
       print "Please try again."
 
 #      time.sleep(1)

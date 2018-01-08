@@ -298,7 +298,7 @@ try:
       mb.dcMotorRightTurn(  ord(cmd[1]) - ord('0')  )
     elif cmd[0] == 't':
       test()
-    else:
+    elif cmd[0] == 'f' or cmd[0] == 'r':
       direction = cmd[0]
       print direction
       mb.setMotorsDirection(direction)
@@ -306,6 +306,11 @@ try:
 #      print cmd[1]
       count = ord(cmd[1]) - ord('0')
       mb.motorSpeed(count)
+
+    else:
+      print "Invalid input: ", cmd[0]
+      print "Please try again."
+
 #      time.sleep(1)
 #      count += 1
 #    if count > motorMaxRPM:

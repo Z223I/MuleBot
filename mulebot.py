@@ -105,6 +105,7 @@ class MuleBot:
 
   def init(self):
 
+    junk = 0
     # This is all interupt stuff for calibrating the speed
     # of the wheels.
     #self.interruptLeftCount  = -2
@@ -202,7 +203,8 @@ def shutdown():
   pwm.setPWM(1, 0, count)
 
   ### How to use the Enable Pin???
-  GPIO.output(pwmEnablePin, GPIO.HIGH)
+  #TODO:  Put this back in.
+  #GPIO.output(pwmEnablePin, GPIO.HIGH)
   GPIO.cleanup()
   print
   print "Bye!"  

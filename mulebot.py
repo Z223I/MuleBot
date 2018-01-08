@@ -1,98 +1,10 @@
-# September 1, 2017
-# Robot increments speed in forward direction.
-#
-#
-# Build 0.0.8
-# Minor redesign.  Def setSpeed added
-#
-# Build 0.0.9
-# Added prompted direction and speed
-#
-# Build 0.0.10
-# The right wheel was turning the fastest.  98% speed seems great.
-#
-# September 7, 2017
-# Build 0.1.11
-# DC motors run at same speed so the robot go straight.
-#
-# September 14, 2017
-# Build 0.1.14
-# Updates to main.
-#
-# September 16, 2017
-# Build 0.1.15
-# Global variables now working
-#
-# September 16, 2017
-# Build 0.1.16
-# Left and right turn implemented
-#
-# September 19, 2017
-# Build 0.1.17
-# Dialed in wheel speeds
-#
-# September 22, 2017
-# Build 0.1.18
-# Updated turns
-#
-# September 22, 2017
-# Build 0.1.19
-# Update laser int to calculate elapsed time
-#
-#
-# September 23, 2017
-# Build 0.1.20
-# I am in the middle of left and right interrupts
-#
-#
-# Build 0.1.21
-#
-# September 23, 2017
-# Build 0.1.22
-# Both interrupts are hopefully workinng
-#
-# Build 0.1.30
-# September 23, 2017
-# Manually calculated speed difference for wheels
-#
-# Build 0.2.31
-# September 23, 2017
-# Wheels are in good lock-step
-#
-# Build 0.2.32
-# September 23, 2017
-# Started polling laser
-#
-#33
-#
-# Build 0.2.34
-# September 24,2017
-# Averaging triggers.  it my include the first and bad number.
-#
-# Build 0.2.35
-# September 24, 2017
-# Good for polling, but not perfect
-#
-#
-# Build 0.2.37
-# September 24, 2017
-# Fixed bug in right interrupt counter
-#
-# Build 0.2.38
-# September 24, 2017
-# SOLID!! Interupts are off.
-#
-# Build 0.3.39
-# September 24, 2017
-# Very good.
-#
-
 #!/usr/bin/python
 
 from Adafruit_PWM_Servo_Driver import PWM
 import time
 #import datetime
 #channel = 6
+
 interruptLeftCount  = -2
 interruptRightCount = -2
 startTimeLeft  = 0
@@ -319,8 +231,8 @@ pwm = PWM(0x40)
 
 
 
-servoMin = 4096 / 12  # Min pulse length out of 4096
-servoMax = 4095       # Max pulse length out of 4096
+#servoMin = 4096 / 12  # Min pulse length out of 4096
+#servoMax = 4095       # Max pulse length out of 4096
 
 def setServoPulse(channel, pulse):
   pulseLength = 1000000                   # 1,000,000 us per second
@@ -334,6 +246,11 @@ def setServoPulse(channel, pulse):
 
 #count = 1
 pwm.setPWMFreq(1000)                        # Set frequency to 1000 Hz
+
+
+
+
+
 
 doContinue = True
 

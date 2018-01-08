@@ -11,6 +11,8 @@ import RPi.GPIO as GPIO
 
 class MuleBot:
   def __init__(self):
+
+    global GPIO
     self.pwmEnablePin       = 16 # Broadcom pin 16
     self.motor1DirectionPin = 20 # Broadcom pin 20
     self.motor2DirectionPin = 21 # Broadcom pin 21
@@ -274,7 +276,7 @@ pwm.setPWMFreq(1000)                        # Set frequency to 1000 Hz
 
 
 
-
+mb = MuleBot()
 
 
 doContinue = True
@@ -289,19 +291,19 @@ try:
     if cmd[0] == 'h':
       doContinue = False
     elif cmd[0] == 'p':
-      dcMotorLeftTurn (  ord(cmd[1]) - ord('0')  )
+      mb.dcMotorLeftTurn (  ord(cmd[1]) - ord('0')  )
     elif cmd[0] == 's':
-      dcMotorRightTurn(  ord(cmd[1]) - ord('0')  )
+      mb.dcMotorRightTurn(  ord(cmd[1]) - ord('0')  )
     elif cmd[0] == 't':
       test()
     else:
       direction = cmd[0]
       print direction
-      setMotorsDirection(direction)
+      mb.setMotorsDirection(direction)
 
 #      print cmd[1]
       count = ord(cmd[1]) - ord('0')
-      motorSpeed(count)
+      mb.motorSpeed(count)
 #      time.sleep(1)
 #      count += 1
 #    if count > motorMaxRPM:

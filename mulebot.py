@@ -11,24 +11,94 @@ import RPi.GPIO as GPIO
 
 class MuleBot:
   def __init__(self):
-    self.junk = 0
+    self.pwmEnablePin       = 16 # Broadcom pin 16
+    self.motor1DirectionPin = 20 # Broadcom pin 20
+    self.motor2DirectionPin = 21 # Broadcom pin 21
 
-pwmEnablePin       = 16 # Broadcom pin 16
-motor1DirectionPin = 20 # Broadcom pin 20
-motor2DirectionPin = 21 # Broadcom pin 21
-
-motorForward = GPIO.HIGH
-motorReverse = GPIO.LOW
+    self.motorForward = GPIO.HIGH
+    self.motorReverse = GPIO.LOW
 
 
-dcMotorLeftMotor  = 0
-dcMotorRightMotor = 1
+    self.dcMotorLeftMotor  = 0
+    self.dcMotorRightMotor = 1
     
-dcMotorPWMDurationLeft = 0
-dcMotorPWMDurationRight = 0
+    self.dcMotorPWMDurationLeft = 0
+    self.dcMotorPWMDurationRight = 0
 
-laserDetectLeftPin  = 6
-laserDetectRightPin = 5
+    self.laserDetectLeftPin  = 6
+    self.laserDetectRightPin = 5
+
+    self.motorMaxRPM = 12
+
+
+  def motorDirection(motorPin, direction):
+  #  print "motorPin: ", motorPin
+  #  print "direction: ",  direction
+    GPIO.output(motorPin, direction)
+
+
+  def motorsDirection(direction):
+    print direction
+    if direction == 'r' or direction == 'R':
+      self.motorDirection(self.motor1DirectionPin, self.motorReverse)
+      self.motorDirection(self.motor2DirectionPin, self.motorReverse)
+      print "Direction reverse"
+    else:
+      self.motorDirection(self.motor1DirectionPin, self.motorForward)
+      self.motorDirection(self.motor2DirectionPin, self.motorForward)
+      print "Direction forward"
+
+  def dcMotorLeftTurn(duration):
+    print "From dcMotorLeftTurn: ", self.dcMotorPWMDurationLeft
+    tempPWMDurationLeft = self.dcMotorPWMDurationLeft * 70 / 100  # 98
+    pwm.setPWM(self.dcMotorLeftMotor, 0, tempPWMDurationLeft)
+
+    # Duration of the turn  
+    time.sleep(duration)
+
+    # Go straight
+    pwm.setPWM(self.dcMotorLeftMotor, 0, self.dcMotorPWMDurationLeft)
+
+
+  def dcMotorRightTurn(duration):
+    tempPWMDurationRight = self.dcMotorPWMDurationRight * 70 / 100
+    pwm.setPWM(self.dcMotorRightMotor, 0, tempPWMDurationRight)
+
+    # Duration of the turn  
+    time.sleep(duration)
+
+    # Go straight
+    pwm.setPWM(self.dcMotorRightMotor, 0, self.dcMotorPWMDurationRight)
+
+
+  def motorSpeed(speedRPM):
+
+    #global dcMotorPWMDurationLeft
+    #global dcMotorPWMDurationRight
+
+#    print "motorSpeed RPM: ", speedRPM
+    if speedRPM > self.motorMaxRPM:
+      speedRPM = 12
+
+
+
+      #TODO: What is going on here?  Should there be 
+      #      two different variables?
+
+
+    if speedRPM < 0:
+      speedRPM = 0
+
+#   Left motor
+    pwmDuration = 4096 * speedRPM / self.motorMaxRPM - 1
+    pwm.setPWM(self.dcMotorLeftMotor, 0, pwmDuration)
+    self.dcMotorPWMDurationLeft = pwmDuration
+
+#   Right motor
+    #Adjust for right motor being faster
+    pwmDuration = pwmDuration * 9851 / 10000  # x97.019779 percent 98.519113
+    pwm.setPWM(self.dcMotorRightMotor, 0, pwmDuration)
+    self.dcMotorPWMDurationRight = pwmDuration
 
 
   def init(self):
@@ -44,6 +114,38 @@ laserDetectRightPin = 5
 
 
 
+  def run(self):
+
+    # Begin main code
+    self.dcMotorPWMDurationLeft = 0
+    self.dcMotorPWMDurationRight = 0
+
+    # Pin Setup:
+    GPIO.setmode(GPIO.BCM) # Broadcom pin-numbering scheme
+    GPIO.setup(self.pwmEnablePin,       GPIO.OUT)
+    GPIO.setup(self.motor1DirectionPin, GPIO.OUT)
+    GPIO.setup(self.motor2DirectionPin, GPIO.OUT)
+
+    GPIO.output(self.pwmEnablePin,       GPIO.LOW )
+
+
+
+
+    #GPIO.setup(laserDetectLeftPin,  GPIO.IN, pull_up_down=GPIO.PUD_UP)
+    #GPIO.setup(laserDetectRightPin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+
+    #GPIO.add_event_detect(laserDetectLeftPin,  GPIO.FALLING, callback=myInt)
+    #GPIO.add_event_detect(laserDetectRightPin, GPIO.FALLING, callback=myInt)
+
+    def setMotorsDirection(_direction):
+      if _direction == 'f' or _direction == 'F':
+        self.motorDirection(self.motor1DirectionPin, self.motorForward)
+        self.motorDirection(self.motor2DirectionPin, self.motorForward)
+      elif _direction == 'r' or _direction == 'R':
+        self.motorDirection(self.motor1DirectionPin, self.motorReverse)
+        self.motorDirection(self.motor2DirectionPin, self.motorReverse)
+      else:
+        print "ERROR: setMotorsDirection bad parameter: " + direction
 
 
 
@@ -51,72 +153,7 @@ laserDetectRightPin = 5
 
 
 
-# Begin GPIO
-# From http://learn.sparkfun.com/tutorials/
-#                raspberry-gpio/python-rpiigpio-example
 
-def motorDirection(motorPin, direction):
-#  print "motorPin: ", motorPin
-#  print "direction: ",  direction
-  GPIO.output(motorPin, direction)
-
-
-def motorsDirection(direction):
-  print direction
-  if direction == 'r' or direction == 'R':
-    motorDirection(motor1DirectionPin, motorReverse)
-    motorDirection(motor2DirectionPin, motorReverse)
-    print "Direction reverse"
-  else:
-    motorDirection(motor1DirectionPin, motorForward)
-    motorDirection(motor2DirectionPin, motorForward)
-    print "Direction forward"
-
-def dcMotorLeftTurn(duration):
-  print "From dcMotorLeftTurn: ", dcMotorPWMDurationLeft
-  tempPWMDurationLeft = dcMotorPWMDurationLeft * 70 / 100  # 98
-  pwm.setPWM(dcMotorLeftMotor, 0, tempPWMDurationLeft)
-
-  # Duration of the turn  
-  time.sleep(duration)
-
-  # Go straight
-  pwm.setPWM(dcMotorLeftMotor, 0, dcMotorPWMDurationLeft)
-
-
-def dcMotorRightTurn(duration):
-  tempPWMDurationRight = dcMotorPWMDurationRight * 70 / 100
-  pwm.setPWM(dcMotorRightMotor, 0, tempPWMDurationRight)
-
-  # Duration of the turn  
-  time.sleep(duration)
-
-  # Go straight
-  pwm.setPWM(dcMotorRightMotor, 0, dcMotorPWMDurationRight)
-
-
-motorMaxRPM = 12
-def motorSpeed(speedRPM):
-
-  global dcMotorPWMDurationLeft
-  global dcMotorPWMDurationRight
-
-#  print "motorSpeed RPM: ", speedRPM
-  if speedRPM > motorMaxRPM:
-    speedRPM = 12
-  if speedRPM < 0:
-    speedRPM = 0
-
-# Left motor
-  pwmDuration = 4096 * speedRPM / motorMaxRPM - 1
-  pwm.setPWM(dcMotorLeftMotor, 0, pwmDuration)
-  dcMotorPWMDurationLeft = pwmDuration
-
-# Right motor
-  #Adjust for right motor being faster
-  pwmDuration = pwmDuration * 9851 / 10000  # x97.019779 percent 98.519113
-  pwm.setPWM(dcMotorRightMotor, 0, pwmDuration)
-  dcMotorPWMDurationRight = pwmDuration
 
 
 def myInt(channel):
@@ -155,38 +192,6 @@ def myInt(channel):
 
 
 
-# Begin main code
-dcMotorPWMDurationLeft = 0
-dcMotorPWMDurationRight = 0
-
-# Pin Setup:
-GPIO.setmode(GPIO.BCM) # Broadcom pin-numbering scheme
-GPIO.setup(pwmEnablePin,       GPIO.OUT)
-GPIO.setup(motor1DirectionPin, GPIO.OUT)
-GPIO.setup(motor2DirectionPin, GPIO.OUT)
-
-GPIO.output(pwmEnablePin,       GPIO.LOW )
-
-
-
-
-GPIO.setup(laserDetectLeftPin,  GPIO.IN, pull_up_down=GPIO.PUD_UP)
-GPIO.setup(laserDetectRightPin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-
-#GPIO.add_event_detect(laserDetectLeftPin,  GPIO.FALLING, callback=myInt)
-#GPIO.add_event_detect(laserDetectRightPin, GPIO.FALLING, callback=myInt)
-
-
-
-def setMotorsDirection(direction):
-  if direction == 'f' or direction == 'F':
-    motorDirection(motor1DirectionPin, motorForward)
-    motorDirection(motor2DirectionPin, motorForward)
-  elif direction == 'r' or direction == 'R':
-    motorDirection(motor1DirectionPin, motorReverse)
-    motorDirection(motor2DirectionPin, motorReverse)
-  else:
-    print "ERROR: setMotorsDirection bad parameter: " + direction
 
 
 def shutdown():

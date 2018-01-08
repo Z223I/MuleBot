@@ -5,18 +5,13 @@ import time
 #import datetime
 #channel = 6
 
-interruptLeftCount  = -2
-interruptRightCount = -2
-startTimeLeft  = 0
-startTimeRight = 0
-lastTimeLeft   = 0
-lastTimeRight  = 0
-
-# Begin GPIO
-# From http://learn.sparkfun.com/tutorials/
-#                raspberry-gpio/python-rpiigpio-example
-
 import RPi.GPIO as GPIO
+
+
+
+class MuleBot:
+  def __init__(self):
+    self.junk = 0
 
 pwmEnablePin       = 16 # Broadcom pin 16
 motor1DirectionPin = 20 # Broadcom pin 20
@@ -34,6 +29,31 @@ dcMotorPWMDurationRight = 0
 
 laserDetectLeftPin  = 6
 laserDetectRightPin = 5
+
+
+  def init(self):
+
+    # This is all interupt stuff for calibrating the speed
+    # of the wheels.
+    #self.interruptLeftCount  = -2
+    #self.interruptRightCount = -2
+    #self.startTimeLeft  = 0
+    #self.startTimeRight = 0
+    #self.lastTimeLeft   = 0
+    #self.lastTimeRight  = 0
+
+
+
+
+
+
+
+
+
+
+# Begin GPIO
+# From http://learn.sparkfun.com/tutorials/
+#                raspberry-gpio/python-rpiigpio-example
 
 def motorDirection(motorPin, direction):
 #  print "motorPin: ", motorPin

@@ -49,6 +49,33 @@ class MuleBot:
     #GPIO.add_event_detect(laserDetectRightPin, GPIO.FALLING, callback=myInt)
 
 
+    # Initialise the PWM device using the default address
+    self.pwm = PWM(0x40)
+    # Note if you'd like more debug output you can instead run:
+    #pwm = PWM(0x40, debug=True)
+
+
+    #count = 1
+    self.pwm.setPWMFreq(1000)                        # Set frequency to 1000 Hz
+
+
+  # I don't think setServoPulse is ever called.
+  # Is the pulse parameter ever used?
+
+  #servoMin = 4096 / 12  # Min pulse length out of 4096
+  #servoMax = 4095       # Max pulse length out of 4096
+
+  def setServoPulse(channel, pulse):
+    pulseLength = 1000000                   # 1,000,000 us per second
+    pulseLength /= 60                       # 60 Hz
+    print "%d us per period" % pulseLength
+    pulseLength /= 4096                     # 12 bits of resolution
+    print "%d us per bit" % pulseLength
+    pulse *= 1000
+    pulse /= pulseLength
+    self.pwm.setPWM(channel, 0, pulse)
+
+
   def motorDirection(self, motorPin, direction):
   #  print "motorPin: ", motorPin
   #  print "direction: ",  direction
@@ -69,24 +96,24 @@ class MuleBot:
   def dcMotorLeftTurn(self, duration):
     print "From dcMotorLeftTurn: ", self.dcMotorPWMDurationLeft
     tempPWMDurationLeft = self.dcMotorPWMDurationLeft * 70 / 100  # 98
-    pwm.setPWM(self.dcMotorLeftMotor, 0, tempPWMDurationLeft)
+    self.pwm.setPWM(self.dcMotorLeftMotor, 0, tempPWMDurationLeft)
 
     # Duration of the turn  
     time.sleep(duration)
 
     # Go straight
-    pwm.setPWM(self.dcMotorLeftMotor, 0, self.dcMotorPWMDurationLeft)
+    self.pwm.setPWM(self.dcMotorLeftMotor, 0, self.dcMotorPWMDurationLeft)
 
 
   def dcMotorRightTurn(self, duration):
     tempPWMDurationRight = self.dcMotorPWMDurationRight * 70 / 100
-    pwm.setPWM(self.dcMotorRightMotor, 0, tempPWMDurationRight)
+    self.pwm.setPWM(self.dcMotorRightMotor, 0, tempPWMDurationRight)
 
     # Duration of the turn  
     time.sleep(duration)
 
     # Go straight
-    pwm.setPWM(self.dcMotorRightMotor, 0, self.dcMotorPWMDurationRight)
+    self.pwm.setPWM(self.dcMotorRightMotor, 0, self.dcMotorPWMDurationRight)
 
 
   def motorSpeed(self, speedRPM):
@@ -109,13 +136,13 @@ class MuleBot:
 
 #   Left motor
     pwmDuration = 4096 * speedRPM / self.motorMaxRPM - 1
-    pwm.setPWM(self.dcMotorLeftMotor, 0, pwmDuration)
+    self.pwm.setPWM(self.dcMotorLeftMotor, 0, pwmDuration)
     self.dcMotorPWMDurationLeft = pwmDuration
 
 #   Right motor
     #Adjust for right motor being faster
     pwmDuration = pwmDuration * 9851 / 10000  # x97.019779 percent 98.519113
-    pwm.setPWM(self.dcMotorRightMotor, 0, pwmDuration)
+    self.pwm.setPWM(self.dcMotorRightMotor, 0, pwmDuration)
     self.dcMotorPWMDurationRight = pwmDuration
 
 
@@ -149,6 +176,18 @@ class MuleBot:
       self.motorDirection(self.motor2DirectionPin, self.motorReverse)
     else:
       print "ERROR: setMotorsDirection bad parameter: " + direction
+
+  def shutdown(self):
+    count = 0
+    self.pwm.setPWM(0, 0, count)
+    self.pwm.setPWM(1, 0, count)
+
+    ### How to use the Enable Pin???
+    #TODO:  Put this back in.
+    #GPIO.output(pwmEnablePin, GPIO.HIGH)
+    GPIO.cleanup()
+    print
+    print "Bye!"  
 
 
 
@@ -197,18 +236,6 @@ def myInt(channel):
 
 
 
-def shutdown():
-  count = 0
-  pwm.setPWM(0, 0, count)
-  pwm.setPWM(1, 0, count)
-
-  ### How to use the Enable Pin???
-  #TODO:  Put this back in.
-  #GPIO.output(pwmEnablePin, GPIO.HIGH)
-  GPIO.cleanup()
-  print
-  print "Bye!"  
-
 
 def test():
   laserOn = 0
@@ -253,28 +280,7 @@ def test():
 # Example Code
 # ===========================================================================
 
-# Initialise the PWM device using the default address
-pwm = PWM(0x40)
-# Note if you'd like more debug output you can instead run:
-#pwm = PWM(0x40, debug=True)
 
-
-
-#servoMin = 4096 / 12  # Min pulse length out of 4096
-#servoMax = 4095       # Max pulse length out of 4096
-
-def setServoPulse(channel, pulse):
-  pulseLength = 1000000                   # 1,000,000 us per second
-  pulseLength /= 60                       # 60 Hz
-  print "%d us per period" % pulseLength
-  pulseLength /= 4096                     # 12 bits of resolution
-  print "%d us per bit" % pulseLength
-  pulse *= 1000
-  pulse /= pulseLength
-  pwm.setPWM(channel, 0, pulse)
-
-#count = 1
-pwm.setPWMFreq(1000)                        # Set frequency to 1000 Hz
 
 
 
@@ -323,7 +329,7 @@ except KeyboardInterrupt:
 
 
 
-shutdown()
+mb.shutdown()
 # exception keyboard
 # cleanup pwm
 #pwm.cleanup()
